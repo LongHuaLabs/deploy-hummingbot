@@ -121,3 +121,47 @@ To get started with deploying your first bot, follow these step-by-step instruct
 
 3. **Monitor and Manage:**
    - Track bot performance and make adjustments as needed through the dashboard.
+
+```
+graph TB
+    subgraph "External Access"
+        User[用户]
+        Bot[Hummingbot 机器人实例]
+    end
+    
+    subgraph "Docker Network: emqx-bridge"
+        subgraph "Frontend Layer"
+            Dashboard[Dashboard<br/>Port: 8501<br/>Streamlit UI]
+        end
+        
+        subgraph "Backend Layer"
+            BackendAPI[Backend API<br/>Port: 8000<br/>REST API Server]
+        end
+        
+        subgraph "Message Broker Layer"
+            EMQX[EMQX Broker<br/>Port: 1883 MQTT<br/>Port: 18083 Dashboard<br/>Port: 8083 WebSocket]
+        end
+    end
+    
+    subgraph "Host System"
+        DockerSocket[Docker Socket<br/>/var/run/docker.sock]
+        BotsDir[Bots Directory<br/>./bots]
+        CredsFile[credentials.yml]
+        PagesDir[Pages Directory<br/>./pages]
+    end
+    
+    User -->|"HTTP:8501"| Dashboard
+    Dashboard -->|"HTTP API Calls"| BackendAPI
+    BackendAPI -->|"MQTT Messages"| EMQX
+    Bot -->|"MQTT Messages"| EMQX
+    
+    Dashboard -.->|"Mount"| CredsFile
+    Dashboard -.->|"Mount"| PagesDir
+    BackendAPI -.->|"Mount"| BotsDir
+    BackendAPI -.->|"Mount"| DockerSocket
+    
+    style Dashboard fill:#e1f5fe
+    style BackendAPI fill:#f3e5f5
+    style EMQX fill:#e8f5e8
+    style PagesDir fill:#fff3e0
+    ```

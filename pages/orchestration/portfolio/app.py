@@ -80,8 +80,8 @@ for account in accounts:
         if exchange in account_state[account]:
             tokens_available += [info["token"] for info in account_state[account][exchange]]
 
-token_options = set(tokens_available)
-tokens_available = st.multiselect("Select Tokens", token_options, token_options)
+token_options = list(set(tokens_available))
+tokens_available = st.multiselect("Select Tokens", token_options, token_options if token_options else [])
 
 
 st.write("---")
